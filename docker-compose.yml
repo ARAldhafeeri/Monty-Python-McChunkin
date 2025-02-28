@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  master:
+    build: ./master
+    container_name: dfs-master
+    ports:
+      - "5000:5000"
+    volumes:
+      - master_data:/data
+    networks:
+      - dfs-network
+
+  datanode1:
+    build: ./datanode
+    container_name: dfs-datanode1
+    environment:
+      - NODE_ID=1
+      - MASTER_URL=http://master:5000
+    volumes:
+      - datanode1_data:/data
+    networks:
+      - dfs-network
+    depends_on:
+      - master
+
+  datanode2:
+    build: ./datanode
+    container_name: dfs-datanode2
+    environment:
+      - NODE_ID=2
+      - MASTER_URL=http://master:5000
+    volumes:
+      - datanode2_data:/data
+    networks:
+      - dfs-network
+    depends_on:
+      - master
+
+  datanode3:
+    build: ./datanode
+    container_name: dfs-datanode3
+    environment:
+      - NODE_ID=3
+      - MASTER_URL=http://master:5000
+    volumes:
+      - datanode3_data:/data
+    networks:
+      - dfs-network
+    depends_on:
+      - master
+
+  client:
+    build: ./client
+    container_name: dfs-client
+    environment:
+      - MASTER_URL=http://master:5000
+    volumes:
+      - ./client/files:/files
+    networks:
+      - dfs-network
+    depends_on:
+      - master
+      - datanode1
+      - datanode2
+      - datanode3
+
+networks:
+  dfs-network:
+
+volumes:
+  master_data:
+  datanode1_data:
+  datanode2_data:
+  datanode3_data:
